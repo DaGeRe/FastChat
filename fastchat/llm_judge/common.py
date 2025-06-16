@@ -9,6 +9,7 @@ import json
 import os
 import re
 import time
+import tiktoken
 from typing import Optional
 
 import openai
@@ -277,7 +278,10 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, multi_turn=F
             model, conv, temperature=0, max_tokens=1024
         )
     else:
-        raise ValueError(f"Invalid judge model name: {model}")
+        print("Sending anyhow")
+        conv.set_system_message(system_prompt)
+        judgment = chat_completion_openai(model, conv, temperature=0, max_tokens=2048)
+        #raise ValueError(f"Invalid judge model name: {model}")
 
     if judge.prompt_template["output_format"] == "[[A]]":
         if "[[A]]" in judgment:
@@ -409,17 +413,41 @@ def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
         openai.api_base = api_dict["api_base"]
         openai.api_key = api_dict["api_key"]
     output = API_ERROR_OUTPUT
+    print("Sending to ",openai.api_base, " model=",model,"token=",openai.api_key)
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
-            response = openai.ChatCompletion.create(
+            start_time = time.time()
+            first_token_time = None
+            print("Start time: {}", start_time)
+            response=openai.ChatCompletion.create(
                 model=model,
                 messages=messages,
-                n=1,
                 temperature=temperature,
                 max_tokens=max_tokens,
+                stream=True
             )
-            output = response["choices"][0]["message"]["content"]
+            full_response = ""
+            for i, chunk in enumerate(response):
+                if i == 0:
+                    first_token_time = time.time()
+                    ttft = first_token_time - start_time
+                    print(f"Time to First Token: {ttft:.2f} seconds")
+                if 'choices' in chunk and 'delta' in chunk['choices'][0]:
+                    full_response += chunk['choices'][0]['delta'].get('content', '')
+            end_time = time.time()
+            response_time = end_time - start_time
+            
+            enc = tiktoken.encoding_for_model("gpt-4")
+            tokens_used = len(enc.encode(full_response))
+
+            tokens_per_second = tokens_used / response_time
+
+            with open("data/responseTime.csv", "a") as f:
+                  f.write(f"{model} {response_time} {ttft} {tokens_per_second}\n")
+            print(f"{model} {response_time} {ttft} {tokens_per_second}\n")
+
+            output = full_response
             break
         except openai.error.OpenAIError as e:
             print(type(e), e)

@@ -6,6 +6,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
 
+import openai
 import numpy as np
 from tqdm import tqdm
 
@@ -207,7 +208,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--first-n", type=int, help="A debug option. Only run the first `n` judgments."
     )
+    parser.add_argument("--openai-api-base", type=str, default=None)
     args = parser.parse_args()
+
+    if args.openai_api_base is not None:
+        openai.api_base = args.openai_api_base
 
     question_file = f"data/{args.bench_name}/question.jsonl"
     answer_dir = f"data/{args.bench_name}/model_answer"
