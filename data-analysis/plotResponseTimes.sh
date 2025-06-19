@@ -1,3 +1,5 @@
+#!/bin/gnuplot
+
 set encoding iso_8859_1
 set terminal pdf size 10,6
 
