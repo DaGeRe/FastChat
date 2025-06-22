@@ -18,8 +18,8 @@ do
 		echo "Moving everything to $resultFolder"
 		mkdir $resultFolder
 		mv data/*csv $resultFolder
-		mv mt_bench/model_answer/ $resultFolder
-		mkdir mt_bench/model_answer/
+		mv data/mt_bench/model_answer/ $resultFolder
+		mkdir data/mt_bench/model_answer/
 	done
 done
 
