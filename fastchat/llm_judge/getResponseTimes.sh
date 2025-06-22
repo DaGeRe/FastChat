@@ -1,12 +1,25 @@
-for model in "ollama-llama3-3-70b" "ollama-codestral-22b" "ollama-deepseek-coder-33b" "ollama-deepseek-r1-70b" "ollama-starcoder2-15b" "vllm-bigcode-starcoder2-15b" "vllm-deepseek-coder-33b-instruct-2gpus" "vllm-deepseek-r1-distill-llama-70b-4gpus" "vllm-mistralai-codestral-22b-v0-1-2gpus"
+#!/bin/bash
+
+for targetRequests in 2 5 10
 do
-	for parallelity in 1 5 10 20
+	echo "== Analyzing with targetRequests=$targetRequests"
+	for parallelity in 40 20 10 1
 	do
-		echo "== Getting answers for model $model $parallelity == "
-		python gen_api_answer.py --model $model --openai-api-base https://kiara.sc.uni-leipzig.de/api --parallel $parallelity
-		mv data/responseTime.csv data/parallel_$parallelity"_"$model.csv
-		echo
-		echo
+		for model in ollama-codestral-22b ollama-deepseek-coder-33b ollama-deepseek-r1-70b ollama-llama3-3-70b ollama-starcoder2-15b vllm-deepseek-coder-33b-instruct-2gpus vllm-llama-3-3-nemotron-super-49b-v1 vllm-llama-4-scout-17b-16e-instruct vllm-meta-llama-llama-3-3-70b-instruct llm-mistralai-codestral-22b-v0-1-2gpus vllm-nvidia-llama-3-3-70b-instruct-fp8 vllm-systran-faster-whisper-medium-en
+		do
+			kubectl patch model $model --type merge -p '{"spec": {"targetRequests": '$targetRequests'}}'
+			echo "== Getting answers for model $model $parallelity == "
+			python gen_api_answer.py --model $model --openai-api-base https://kiara.sc.uni-leipzig.de/api --parallel $parallelity
+			mv data/responseTime.csv data/parallel_$parallelity"_"$model"_"$targetRequests.csv
+			echo
+			echo
+		done
+		resultFolder="data/target_"$targetRequests"_"$parallelity
+		echo "Moving everything to $resultFolder"
+		mkdir $resultFolder
+		mv data/*csv $resultFolder
+		mv mt_bench/model_answer/ $resultFolder
+		mkdir mt_bench/model_answer/
 	done
 done
 
