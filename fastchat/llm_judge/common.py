@@ -186,7 +186,9 @@ def run_judge_single(question, answer, judge, ref_answer, multi_turn=False):
             model, conv, temperature=0, max_tokens=1024
         )
     else:
-        raise ValueError(f"Invalid judge model name: {model}")
+        print(f"Judge model not typically used: {model}")
+        judgment = chat_completion_openai(model, conv, temperature=0, max_tokens=2048)
+        #raise ValueError(f"Invalid judge model name: {model}")
 
     if judge.prompt_template["output_format"] == "[[rating]]":
         match = re.search(one_score_pattern, judgment)
