@@ -8,7 +8,7 @@ set out 'singleScaling.pdf'
 set multiplot layout 4,1
 
 set y2tics
-set y2range [0:5]
+set y2range [0:15]
 
 do for [i in "1 10 20 40"] {
     filename = sprintf("plottable_%s.csv", i)
