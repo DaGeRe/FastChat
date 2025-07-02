@@ -24,7 +24,7 @@ CATEGORIES = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction"
 def get_model_df():
     cnt = 0
     q2result = []
-    fin = open("./target_2_10/model_judgment/ollama-llama3-3-70b_single.jsonl", "r")
+    fin = open("./target_2_10/model_judgment/vllm-llama-4-scout-17b-16e-instruct_single.jsonl", "r")
     for line in fin:
         obj = json.loads(line)
         obj["category"] = CATEGORIES[(obj["question_id"]-81)//10]
@@ -89,16 +89,7 @@ for model in all_models:
         scores_all.append({"model": model, "category": cat, "score": score})
 
 target_models = [
-    'ollama-starcoder2-15b',
-    'ollama-llama3-3-70b',
-    'vllm-llama-4-scout-17b-16e-instruct',
-    'vllm-meta-llama-llama-3-3-70b-instruct',
-    'vllm-llama-3-3-nemotron-super-49b-v1',
-    'vllm-deepseek-coder-33b-instruct-2gpus',
-    'vllm-nvidia-llama-3-3-70b-instruct-fp8',
-    'ollama-codestral-22b',
-    'ollama-deepseek-r1-70b',
-    'ollama-deepseek-coder-33b'
+    "ollama-llama3-3-70b", "vllm-deepseek-coder-33b-instruct", "vllm-deepseek-r1-distill-llama-70b", "vllm-llama-3-3-nemotron-super-49b-v1", "vllm-llama-4-scout-17b-16e-instruct", "vllm-meta-llama-llama-3-3-70b-instruct", "vllm-mistral-small-24b-instruct-2501", "vllm-nvidia-llama-3-3-70b-instruct-fp8"
 ]
 
 scores_target = [scores_all[i] for i in range(len(scores_all)) if scores_all[i]["model"] in target_models]
