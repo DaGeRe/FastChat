@@ -30,7 +30,7 @@ do
 		| awk -F',' '{print $2}' \
 		| getSum
 	done | awk '{print $2}' | getSum | awk '{print $1/$2}'
-done | sort -k 2 | awk '{print $1" & "$2" & "$3" \\\\ \\hline"}'
+done | sort -k 2 | awk '{printf "%s & %.3f & %.3f \\\\ \\hline\n", $1, $2, $3}'
 
 exit 1
 
