@@ -101,7 +101,7 @@ def count_running_pods(model):
         print("Fehler beim Abrufen der Pods:", e)
         return -1
 
-def load_questions(question_file: str, begin: Optional[int], end: Optional[int]):
+def load_questions(question_file: str, begin: Optional[int], end: Optional[int], repetitions: int = 1):
     """Load questions from a file."""
     questions = []
     with open(question_file, "r") as ques_file:
@@ -109,6 +109,7 @@ def load_questions(question_file: str, begin: Optional[int], end: Optional[int])
             if line:
                 questions.append(json.loads(line))
     questions = questions[begin:end]
+    questions *= repetitions
     return questions
 
 
