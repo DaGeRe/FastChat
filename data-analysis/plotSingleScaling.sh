@@ -10,7 +10,7 @@ do
 	do
 		for parallel in 100 40 20 10 1
 		do
-			cat target_"$targetRequests"_"$parallel"/parallel_"$parallel"_vllm-llama-4-scout-17b-16e-instruct_"$targetRequests".csv \
+			cat target_"$targetRequests"_"$parallel"/parallel_"$parallel"_"$model"_"$targetRequests".csv \
 				| awk '{sum += $5; sum2 += $6; count++; if (count == 5) { print $3" "sum / 5" "sum2/5; sum = 0; sum2=0; count = 0; } }' \
 				> results/plottable_"$parallel"_"$model".csv
 		done
