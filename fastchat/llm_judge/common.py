@@ -115,6 +115,21 @@ def count_running_pods(model):
     except subprocess.CalledProcessError as e:
         print("Fehler beim Abrufen der Pods:", e)
         return -1
+        
+def count_usable_pods(model):
+    try:
+        result = subprocess.run(
+            ["kubectl", "get", "pods", "--output=wide"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        lines = result.stdout.splitlines()
+        matching_lines = [line for line in lines if "Running" in line and "1/1" in line and model in line]
+        return len(matching_lines)
+    except subprocess.CalledProcessError as e:
+        print("Fehler beim Abrufen der Pods:", e)
+        return -1
 
 def load_questions(question_file: str, begin: Optional[int], end: Optional[int], repetitions: int = 1):
     """Load questions from a file."""
@@ -481,12 +496,13 @@ def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
             print("Input tokens: ", input_token_count, " Tokens used:", tokens_used)
 
             tokens_per_second = tokens_used / response_time
+            usable_pods=count_usable_pods(model)
             running_pods=count_running_pods(model)
             started_pods=count_started_pods(model)
 
             with open("data/responseTime.csv", "a") as f:
-                  f.write(f"{model} {input_token_count} {running_pods} {started_pods} {response_time} {ttft} {tokens_per_second}\n")
-            print(f"{model} {input_token_count} {running_pods} {started_pods} {response_time} {ttft} {tokens_per_second}\n")
+                  f.write(f"{model} {input_token_count} {started_pods} {running_pods} {usable_pods} {response_time} {ttft} {tokens_per_second}\n")
+            print(f"{model} {input_token_count} {started_pods} {running_pods} {usable_pods} {response_time} {ttft} {tokens_per_second}\n")
 
             output = full_response
             break
