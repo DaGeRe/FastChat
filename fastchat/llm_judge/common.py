@@ -500,9 +500,10 @@ def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
             running_pods=count_running_pods(model)
             started_pods=count_started_pods(model)
 
+            log_line = f"{start_time} {model} {input_token_count} {started_pods} {running_pods} {usable_pods} {response_time} {ttft} {tokens_per_second}\n"
             with open("data/responseTime.csv", "a") as f:
-                  f.write(f"{model} {input_token_count} {started_pods} {running_pods} {usable_pods} {response_time} {ttft} {tokens_per_second}\n")
-            print(f"{model} {input_token_count} {started_pods} {running_pods} {usable_pods} {response_time} {ttft} {tokens_per_second}\n")
+                  f.write(log_line)
+            print(log_line)
 
             output = full_response
             break
