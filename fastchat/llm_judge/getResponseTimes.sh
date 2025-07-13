@@ -15,7 +15,7 @@ do
 			else
 				repetitions=20
 			fi
-			echo "== Getting answers for model $model $parallelity $repetitions == "
+			echo "== Getting answers for model $model parallelity: $parallelity targetRequests: $targetRequests Repetitions: $repetitions == "
 			python gen_api_answer.py \
 				--model $model \
 				--openai-api-base https://kiara.sc.uni-leipzig.de/api \
