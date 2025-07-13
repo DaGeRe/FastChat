@@ -47,9 +47,9 @@ do
 		done
 		resultFolder="data/target_"$targetRequests"_"$parallelity
 		echo "Moving everything to $resultFolder"
-		mkdir $resultFolder
+		mkdir -p $resultFolder
 		mv data/*csv $resultFolder
-		mkdir $resultFolder/model_answer/
+		mkdir -p $resultFolder/model_answer/
 		mv data/mt_bench/model_answer/* $resultFolder/model_answer/
 	done
 done
