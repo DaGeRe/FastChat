@@ -44,13 +44,14 @@ do
 		for targetRequests in 5 10 20
 		do
 			runOneConfiguration $model $parallelity $targetRequests
+			
+			resultFolder="data/target_"$targetRequests"_"$parallelity
+			echo "Moving everything to $resultFolder"
+			mkdir -p $resultFolder
+			mv data/*csv $resultFolder
+			mkdir -p $resultFolder/model_answer/
+			mv data/mt_bench/model_answer/* $resultFolder/model_answer/
 		done
-		resultFolder="data/target_"$targetRequests"_"$parallelity
-		echo "Moving everything to $resultFolder"
-		mkdir -p $resultFolder
-		mv data/*csv $resultFolder
-		mkdir -p $resultFolder/model_answer/
-		mv data/mt_bench/model_answer/* $resultFolder/model_answer/
 	done
 done
 
