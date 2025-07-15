@@ -48,16 +48,28 @@ function sortResults {
 	mv data/mt_bench/model_answer/* $resultFolder/model_answer/
 }
 
-for model in vllm-mistral-small-24b-instruct-2501 vllm-meta-llama-llama-3-3-70b-instruct vllm-llama-4-scout-17b-16e-instruct ollama-llama3-3-70b vllm-deepseek-coder-33b-instruct vllm-deepseek-r1-distill-llama-70b vllm-llama-3-3-nemotron-super-49b-v1 vllm-nvidia-llama-3-3-70b-instruct-fp8
+for targetRequests in 5 10 20
 do
 	echo "== Analyzing with targetRequests=$targetRequests"
 	for parallelity in 100 50 20 10 1
 	do
-		for targetRequests in 5 10 20
+		for model in vllm-mistral-small-24b-instruct-2501 vllm-meta-llama-llama-3-3-70b-instruct vllm-llama-4-scout-17b-16e-instruct
 		do
 			runOneConfiguration $model $parallelity $targetRequests
 			sortResults $model $parallelity $targetRequests
-			
+		done
+	done
+done
+
+for targetRequests in 5 10 20
+do
+	echo "== Analyzing with targetRequests=$targetRequests"
+	for parallelity in 100 50 20 10 1
+	do
+		for model in ollama-llama3-3-70b vllm-deepseek-coder-33b-instruct vllm-deepseek-r1-distill-llama-70b vllm-llama-3-3-nemotron-super-49b-v1 vllm-nvidia-llama-3-3-70b-instruct-fp8
+		do
+			runOneConfiguration $model $parallelity $targetRequests
+			sortResults $model $parallelity $targetRequests
 		done
 	done
 done
