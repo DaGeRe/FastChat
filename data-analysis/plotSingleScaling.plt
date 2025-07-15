@@ -11,7 +11,7 @@ set multiplot layout 5,1
 set y2tics
 set y2range [0:15]
 
-do for [parallelity in "1 10 20 40 100"] {
+do for [parallelity in "1 10 20 50 100"] {
     filename = sprintf("plottable_%s_%s.csv", parallelity, model)
     currentTitle = sprintf("parallelity=%s, targetRequests=%d", parallelity, targetRequests);
     set title currentTitle
