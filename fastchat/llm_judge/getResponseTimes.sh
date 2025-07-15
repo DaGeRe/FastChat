@@ -36,6 +36,18 @@ function runOneConfiguration {
 	echo
 }
 
+function sortResults {
+	model=$1
+	parallelity=$2
+	targetRequests=$3
+	resultFolder="data/target_"$targetRequests"_"$parallelity
+	echo "Moving everything to $resultFolder"
+	mkdir -p $resultFolder
+	mv data/*csv $resultFolder
+	mkdir -p $resultFolder/model_answer/
+	mv data/mt_bench/model_answer/* $resultFolder/model_answer/
+}
+
 for model in vllm-mistral-small-24b-instruct-2501 vllm-meta-llama-llama-3-3-70b-instruct vllm-llama-4-scout-17b-16e-instruct ollama-llama3-3-70b vllm-deepseek-coder-33b-instruct vllm-deepseek-r1-distill-llama-70b vllm-llama-3-3-nemotron-super-49b-v1 vllm-nvidia-llama-3-3-70b-instruct-fp8
 do
 	echo "== Analyzing with targetRequests=$targetRequests"
@@ -44,13 +56,8 @@ do
 		for targetRequests in 5 10 20
 		do
 			runOneConfiguration $model $parallelity $targetRequests
+			sortResults $model $parallelity $targetRequests
 			
-			resultFolder="data/target_"$targetRequests"_"$parallelity
-			echo "Moving everything to $resultFolder"
-			mkdir -p $resultFolder
-			mv data/*csv $resultFolder
-			mkdir -p $resultFolder/model_answer/
-			mv data/mt_bench/model_answer/* $resultFolder/model_answer/
 		done
 	done
 done
