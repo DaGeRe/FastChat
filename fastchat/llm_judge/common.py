@@ -482,7 +482,10 @@ def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
                     ttft = first_token_time - start_time
                     print(f"Time to First Token: {ttft:.2f} seconds")
                 if 'choices' in chunk and 'delta' in chunk['choices'][0]:
-                    full_response += chunk['choices'][0]['delta'].get('content', '')
+                    delta = chunk["choices"][0]["delta"]
+                    content = delta.get("content", '')
+                    if content is not None:
+                       full_response += content
             end_time = time.time()
             response_time = end_time - start_time
             
@@ -510,7 +513,9 @@ def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
         except openai.error.OpenAIError as e:
             print(type(e), e)
             time.sleep(API_RETRY_SLEEP)
-
+        except Exception as e:
+            print("Something happened: ", e)
+            
     return output
 
 
