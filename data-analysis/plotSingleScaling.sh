@@ -38,6 +38,8 @@ done
 
 paste -d " " results/scaling_vllm-mistral-small-24b-instruct-2501.csv results/scaling_vllm-meta-llama-llama-3-3-70b-instruct.csv results/scaling_vllm-llama-4-scout-17b-16e-instruct.csv | grep "^5 "> results/scaling_all.csv
 
+gnuplot -c plotScalingAll.plt
+
 exit 1
 
 export targetRequests=10
