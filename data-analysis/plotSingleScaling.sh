@@ -4,8 +4,15 @@ function getSum {
   awk -vOFMT=%.10g '{sum += $1; square += $1^2} END {print sqrt(square / NR - (sum/NR)^2)" "sum/NR" "NR}'
 }
 
-
 set -e
+
+start=$(pwd)
+
+if [ -d $1 ]
+then
+	cd $1
+fi
+
 
 mkdir -p results
 
@@ -30,7 +37,7 @@ do
 		cd results
 		
 		
-		gnuplot -e "model='$model'" -e "targetRequests=$targetRequests" ../plotSingleScaling.plt
+		gnuplot -e "model='$model'" -e "targetRequests=$targetRequests" $start/plotSingleScaling.plt
 		mv "scaling_$model.pdf" "$model/scaling_$model"_"$targetRequests.pdf"
 		cd ..
 	done > results/scaling_$model.csv
@@ -38,7 +45,7 @@ done
 
 paste -d " " results/scaling_vllm-mistral-small-24b-instruct-2501.csv results/scaling_vllm-meta-llama-llama-3-3-70b-instruct.csv results/scaling_vllm-llama-4-scout-17b-16e-instruct.csv | grep "^5 "> results/scaling_all.csv
 
-gnuplot -c plotScalingAll.plt
+gnuplot -c $start/plotScalingAll.plt
 
 exit 1
 
