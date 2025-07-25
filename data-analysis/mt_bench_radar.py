@@ -12,6 +12,7 @@ Original file is located at
 
 """
 
+import sys
 import json
 import pandas as pd
 import plotly.express as px
@@ -21,10 +22,10 @@ import plotly.graph_objects as go
 CATEGORIES = ["Writing", "Roleplay", "Reasoning", "Math", "Coding", "Extraction", "STEM", "Humanities"]
 
 
-def get_model_df():
+def get_model_df(filename):
     cnt = 0
     q2result = []
-    fin = open("./target_2_10/model_judgment/vllm-llama-4-scout-17b-16e-instruct_single.jsonl", "r")
+    fin = open(filename, "r")
     for line in fin:
         obj = json.loads(line)
         obj["category"] = CATEGORIES[(obj["question_id"]-81)//10]
@@ -39,7 +40,7 @@ def toggle(res_str):
         return "win"
     return "tie"
 
-def get_model_df_pair():
+def get_model_df_pair(filename):
     fin = open("gpt-4_pair.jsonl", "r")
     cnt = 0
     q2result = []
@@ -63,67 +64,76 @@ def get_model_df_pair():
 
     return df
 
-df = get_model_df()
-#df_pair = get_model_df_pair()
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python script.py <input_file.jsonl>")
+        sys.exit(1)
 
-#df_pair
+    filename = sys.argv[1]
+    df = get_model_df(filename)
 
-all_models = df["model"].unique()
-print(all_models)
-scores_all = []
-for model in all_models:
-    for cat in CATEGORIES:
-        # filter category/model, and score format error (<1% case)
-        res = df[(df["category"]==cat) & (df["model"]==model) & (df["score"] >= 0)]
-        score = res["score"].mean()
+    #df_pair = get_model_df_pair()
 
-        # # pairwise result
-        # res_pair = df_pair[(df_pair["category"]==cat) & (df_pair["model"]==model)]["result"].value_counts()
-        # wincnt = res_pair["win"] if "win" in res_pair.index else 0
-        # tiecnt = res_pair["tie"] if "tie" in res_pair.index else 0
-        # winrate = wincnt/res_pair.sum()
-        # winrate_adjusted = (wincnt + tiecnt)/res_pair.sum()
-        # # print(winrate_adjusted)
+    #df_pair
 
-        # scores_all.append({"model": model, "category": cat, "score": score, "winrate": winrate, "wtrate": winrate_adjusted})
-        scores_all.append({"model": model, "category": cat, "score": score})
+    all_models = df["model"].unique()
+    print(all_models)
+    scores_all = []
+    for model in all_models:
+        for cat in CATEGORIES:
+           # filter category/model, and score format error (<1% case)
+           res = df[(df["category"]==cat) & (df["model"]==model) & (df["score"] >= 0)]
+           score = res["score"].mean()
 
-target_models = [
-    "ollama-llama3-3-70b", "vllm-deepseek-coder-33b-instruct", "vllm-deepseek-r1-distill-llama-70b", "vllm-llama-3-3-nemotron-super-49b-v1", "vllm-llama-4-scout-17b-16e-instruct", "vllm-meta-llama-llama-3-3-70b-instruct", "vllm-mistral-small-24b-instruct-2501", "vllm-nvidia-llama-3-3-70b-instruct-fp8"
-]
+           # # pairwise result
+           # res_pair = df_pair[(df_pair["category"]==cat) & (df_pair["model"]==model)]["result"].value_counts()
+           # wincnt = res_pair["win"] if "win" in res_pair.index else 0
+           # tiecnt = res_pair["tie"] if "tie" in res_pair.index else 0
+           # winrate = wincnt/res_pair.sum()
+           # winrate_adjusted = (wincnt + tiecnt)/res_pair.sum()
+           # # print(winrate_adjusted)
 
-scores_target = [scores_all[i] for i in range(len(scores_all)) if scores_all[i]["model"] in target_models]
+           # scores_all.append({"model": model, "category": cat, "score": score, "winrate": winrate, "wtrate": winrate_adjusted})
+           scores_all.append({"model": model, "category": cat, "score": score})
 
-# sort by target_models
-scores_target = sorted(scores_target, key=lambda x: target_models.index(x["model"]), reverse=True)
+    target_models = [
+        "ollama-llama3-3-70b", "vllm-deepseek-coder-33b-instruct", "vllm-deepseek-r1-distill-llama-70b", "vllm-llama-3-3-nemotron-super-49b-v1", "vllm-llama-4-scout-17b-16e-instruct", "vllm-meta-llama-llama-3-3-70b-instruct", "vllm-mistral-small-24b-instruct-2501", "vllm-nvidia-llama-3-3-70b-instruct-fp8"
+    ]
 
-df_score = pd.DataFrame(scores_target)
-df_score = df_score[df_score["model"].isin(target_models)]
+    scores_target = [scores_all[i] for i in range(len(scores_all)) if scores_all[i]["model"] in target_models]
 
-rename_map = {"llama-13b": "LLaMA-13B",
-              "alpaca-13b": "Alpaca-13B",
-              "vicuna-33b-v1.3": "Vicuna-33B",
-              "vicuna-13b-v1.3": "Vicuna-13B",
-              "gpt-3.5-turbo": "GPT-3.5-turbo",
-              "claude-v1": "Claude-v1",
-              "gpt-4": "GPT-4"}
+    # sort by target_models
+    scores_target = sorted(scores_target, key=lambda x: target_models.index(x["model"]), reverse=True)
 
-for k, v in rename_map.items():
-    df_score.replace(k, v, inplace=True)
+    df_score = pd.DataFrame(scores_target)
+    df_score = df_score[df_score["model"].isin(target_models)]
 
-fig = px.line_polar(df_score, r = 'score', theta = 'category', line_close = True, category_orders = {"category": CATEGORIES},
-                    color = 'model', markers=True, color_discrete_sequence=px.colors.qualitative.Pastel)
+    rename_map = {"llama-13b": "LLaMA-13B",
+                 "alpaca-13b": "Alpaca-13B",
+                 "vicuna-33b-v1.3": "Vicuna-33B",
+                 "vicuna-13b-v1.3": "Vicuna-13B",
+                 "gpt-3.5-turbo": "GPT-3.5-turbo",
+                 "claude-v1": "Claude-v1",
+                 "gpt-4": "GPT-4"}
 
-fig.show()
+    for k, v in rename_map.items():
+        df_score.replace(k, v, inplace=True)
 
-# fig = px.line_polar(df_score, r = 'wtrate', theta = 'category', line_close = True, category_orders = {"category": CATEGORIES},
-#                     color = 'model', markers=True, color_discrete_sequence=px.colors.qualitative.Pastel)
-# fig.show()
+    fig = px.line_polar(df_score, r = 'score', theta = 'category', line_close = True, category_orders = {"category": CATEGORIES},
+                       color = 'model', markers=True, color_discrete_sequence=px.colors.qualitative.Pastel)
 
-fig.update_layout(
-    font=dict(
-        size=18,
-    ),
-)
-fig.write_image("fig.png", width=800, height=600, scale=2)
+    fig.show()
 
+    # fig = px.line_polar(df_score, r = 'wtrate', theta = 'category', line_close = True, category_orders = {"category": CATEGORIES},
+    #                     color = 'model', markers=True, color_discrete_sequence=px.colors.qualitative.Pastel)
+    # fig.show()
+
+    fig.update_layout(
+        font=dict(
+           size=18,
+        ),
+    )
+    fig.write_image("fig.png", width=800, height=600, scale=2)
+
+if __name__ == "__main__":
+    main()
