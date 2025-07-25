@@ -7,12 +7,10 @@ function getSum {
 set -e
 
 start=$(pwd)
-
 if [ -d $1 ]
 then
 	cd $1
 fi
-
 
 mkdir -p results
 
